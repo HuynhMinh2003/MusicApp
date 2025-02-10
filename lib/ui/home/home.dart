@@ -5,6 +5,7 @@ import 'package:music_app/ui/home/viewmodel.dart';
 import 'package:music_app/ui/now_playing/audio_player_manager.dart';
 import 'package:music_app/ui/settings/settings.dart';
 import 'package:music_app/ui/user/user.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../data/model/song.dart';
 import '../now_playing/playing.dart';
@@ -85,6 +86,7 @@ class HomeTabPage extends StatefulWidget {
 
   @override
   State<HomeTabPage> createState() => _HomeTabPageState();
+
 }
 
 //muốn thay đổi gì thì thay đổi trực tiếp ở đây
@@ -127,7 +129,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
     _viewModel.songStream.stream.listen((songList) {
       setState(() {
         // Thêm các bài hát mới vào danh sách
-        songs.addAll(songList);
+        songs = songList; // Cập nhật danh sách thay vì thêm vào danh sách cũ
       });
     });
   }
@@ -189,6 +191,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
     return _SongItemSection(
       parent: this, // Truyền đối tượng cha để gọi lại các hàm từ đây
       song: songs[index], // Truyền bài hát hiện tại
+      index: index, // Truyền index vào _SongItemSection
     );
   }
 
@@ -224,11 +227,11 @@ class _HomeTabPageState extends State<HomeTabPage> {
   }
 
   // Điều hướng tới màn hình NowPlaying với bài hát được chọn
-  void navigate(Song song) {
+  void navigate(Song song, int index) {
     Navigator.push(context, CupertinoPageRoute(builder: (context) {
       return NowPlaying(
-        songs: songs, // Truyền danh sách bài hát
-        playingSong: song, // Truyền bài hát đang phát
+        songs: songs,
+        playingSong: songs[index], // Truyền bài hát dựa trên index
       );
     }));
   }
@@ -237,11 +240,13 @@ class _HomeTabPageState extends State<HomeTabPage> {
 class _SongItemSection extends StatelessWidget {
   const _SongItemSection({
     required this.parent, // Tham chiếu đến State của màn hình cha (_HomeTabPageState)
-    required this.song, // Thông tin bài hát (tiêu đề, nghệ sĩ, ảnh, v.v.)
+    required this.song,
+    required this.index,
   });
 
   final _HomeTabPageState parent; // Lớp cha để gọi các phương thức điều hướng và hiển thị Bottom Sheet
   final Song song; // Dữ liệu bài hát hiện tại
+  final int index; // Lưu vị trí của bài hát trong danh sách
 
   @override
   Widget build(BuildContext context) {
@@ -251,20 +256,14 @@ class _SongItemSection extends StatelessWidget {
         right: 8, // Khoảng cách bên phải của item
       ),
 
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8), // Bo góc ảnh của bài hát
-        child: FadeInImage.assetNetwork(
-          placeholder: 'assets/itunes_256.png', // Ảnh placeholder khi đang tải ảnh từ mạng
-          image: song.image, // Đường dẫn ảnh bài hát từ dữ liệu bài hát
-          width: 48, // Chiều rộng của ảnh
-          height: 48, // Chiều cao của ảnh
-          imageErrorBuilder: (context, error, stackTrace) {
-            return Image.asset(
-              'assets/itunes_256.png', // Hiển thị ảnh mặc định nếu tải ảnh từ mạng thất bại
-              width: 48,
-              height: 48,
-            );
-          },
+      leading:  ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedNetworkImage(
+          imageUrl: song.image,
+          placeholder: (context, url) => Image.asset('assets/itunes_256.png', width: 48, height: 48),
+          errorWidget: (context, url, error) => Image.asset('assets/itunes_256.png', width: 48, height: 48),
+          width: 48,
+          height: 48,
         ),
       ),
       title: Text(song.title), // Hiển thị tiêu đề bài hát
@@ -277,7 +276,7 @@ class _SongItemSection extends StatelessWidget {
         },
       ),
       onTap: () {
-        parent.navigate(song); // Điều hướng đến màn hình phát nhạc khi nhấn vào item
+        parent.navigate(song,index); // Điều hướng đến màn hình phát nhạc khi nhấn vào item
       },
     );
   }
