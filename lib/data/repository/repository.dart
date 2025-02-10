@@ -17,26 +17,19 @@ class DefaultRepository implements Repository {
   // Phương thức tải dữ liệu danh sách các bài hát
   @override
   Future<List<Song>?> loadData() async {
-    // Danh sách chứa các bài hát
     List<Song> songs = [];
 
-    // Gọi phương thức loadData từ remoteDataSource
-    await _remoteDataSource.loadData().then((remoteSongs) async {
-      // Nếu không có dữ liệu từ remote (remoteSongs == null)
-      if (remoteSongs == null) {
-        // Gọi loadData từ localDataSource
-        _localDataSource.loadData().then((localSongs) {
-          // Nếu localSongs không null, thêm vào danh sách
-          if (localSongs != null) {
-            songs.addAll(localSongs);
-          }
-        });
-      } else {
-        // Nếu có dữ liệu từ remote, thêm dữ liệu đó vào danh sách
-        songs.addAll(remoteSongs);
+    // Thử lấy dữ liệu từ Remote API
+    final remoteSongs = await _remoteDataSource.loadData();
+    if (remoteSongs != null) {
+      songs.addAll(remoteSongs);
+    } else {
+      // Nếu không có dữ liệu từ Remote, lấy từ Local
+      final localSongs = await _localDataSource.loadData();
+      if (localSongs != null) {
+        songs.addAll(localSongs);
       }
-    });
-    // Trả về danh sách bài hát đã thu thập được
+    }
     return songs;
   }
 }
