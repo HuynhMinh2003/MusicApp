@@ -5,17 +5,23 @@ import '../../data/model/song.dart'; // Import model Song để làm việc vớ
 
 // Định nghĩa lớp MusicAppViewModel
 class MusicAppViewModel {
-  // StreamController để quản lý luồng dữ liệu danh sách bài hát
-  StreamController<List<Song>> songStream = StreamController();
+  // StreamController để quản lý danh sách bài hát
+  final StreamController<List<Song>> songStream = StreamController();
 
-  // Phương thức để tải danh sách bài hát
-  void loadSongs() {
-    // Khởi tạo một repository mặc định
+  // Phương thức tải danh sách bài hát từ Repository
+  void loadSongs() async {
     final repository = DefaultRepository();
-    // Gọi phương thức loadData từ repository để tải dữ liệu
-    repository.loadData().then((value) =>
-    // Đẩy dữ liệu (value) vào StreamController
-    songStream.add(value!)
-    );
+    final songs = await repository.loadData();
+
+    // Kiểm tra nếu songs không null, thì thêm vào Stream
+    if (songs != null) {
+      songStream.add(songs);
+    }
+  }
+
+  // Phương thức để giải phóng tài nguyên (tránh rò rỉ bộ nhớ)
+  void dispose() {
+    songStream.close();
   }
 }
+
