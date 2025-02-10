@@ -1,4 +1,5 @@
 // Import thư viện 'just_audio' để phát âm thanh và 'rxdart' để xử lý luồng dữ liệu.
+import 'package:flutter/animation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -20,35 +21,62 @@ class AudioPlayerManager {
   Stream<DurationState>? durationState;
 
   // URL của bài hát hiện tại.
-  String songUrl = "";
+  String? songUrl;
+
+  // Tạo AnimationController để duy trì trạng thái xoay ảnh album
+  AnimationController? rotationController;
+
+  bool isPlaying = false; // 🟢 Trạng thái nhạc (đang phát hoặc dừng)
 
   // Phương thức chuẩn bị phát bài hát.
-  void prepare({bool isNewSong = false}) {
+  Future<void> prepare({bool isNewSong = false}) async{
+    // Nếu chưa có URL, không làm gì cả
+    if (songUrl == null || songUrl!.isEmpty) return;
     // Kết hợp luồng vị trí phát và sự kiện phát để tạo ra trạng thái tiến trình.
-    durationState = Rx.combineLatest2<Duration, PlaybackEvent, DurationState>(
-        player.positionStream, // Luồng vị trí phát.
-        player.playbackEventStream, // Luồng sự kiện phát.
-            (position, playbackEvent) =>
+    durationState = Rx.combineLatest2<Duration, Duration?, DurationState>(
+        player.positionStream, // Vị trí phát ht.
+        player.durationStream, // Tổng thời lượng bh.
+            (position, total) =>
             DurationState( // Tạo một đối tượng DurationState.
                 progress: position, // Thời gian đã phát.
-                buffered: playbackEvent.bufferedPosition, // Thời gian đã tải trước.
-                total: playbackEvent.duration)); // Tổng thời gian bài hát.
+                buffered: player.bufferedPosition, // Thời gian đã tải trước.
+                total: total ?? Duration.zero,)); // Tổng thời gian bài hát.
 
     // Nếu là bài hát mới, thiết lập URL cho player.
     if (isNewSong) {
-      player.setUrl(songUrl);
+      await player.setUrl(songUrl!);
     }
   }
 
   // Phương thức cập nhật URL của bài hát.
-  void updateSongUrl(String url) {
-    songUrl = url; // Gán URL mới cho biến songUrl.
-    prepare(); // Gọi lại phương thức prepare.
+  Future<void> updateSongUrl(String url) async{
+    if (url != songUrl) {
+      songUrl = url;
+      await prepare(isNewSong: true);
+    }else {
+      await prepare(isNewSong: false); // Gọi lại prepare() để đảm bảo trình phát hoạt động
+    }
   }
+
+  // // Phương thức phát nhạc
+  // Future<void> play() async {
+  //   if (player.playing) return;
+  //   await player.play();
+  // }
+  //
+  // // Phương thức tạm dừng nhạc
+  // Future<void> pause() async {
+  //   await player.pause();
+  // }
+  //
+  // // Phương thức dừng nhạc
+  // Future<void> stop() async {
+  //   await player.stop();
+  // }
 
   // Phương thức giải phóng tài nguyên khi không còn sử dụng.
   void dispose() {
-    player.dispose(); // Dừng và giải phóng AudioPlayer.
+    //player.dispose(); // Dừng và giải phóng AudioPlayer.
   }
 }
 

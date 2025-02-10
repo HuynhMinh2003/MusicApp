@@ -54,15 +54,29 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     super.initState();
     _currentAnimationPosition = 0.0;
     _song = widget.playingSong;//Lấy bài hát hiện tại
-    _imageAnimController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 12000),
-    );
+    // _imageAnimController = AnimationController(
+    //   vsync: this,
+    //   duration: const Duration(milliseconds: 12000),
+    // );
+    // Lấy AnimationController từ AudioPlayerManager
+    _imageAnimController = AudioPlayerManager().rotationController ??
+        AnimationController(
+          vsync: this,
+          duration: const Duration(seconds: 10), // Xoay 1 vòng trong 10 giây
+        ); // Lặp vô hạn
+
+    // Cập nhật lại controller để dùng lần sau
+    AudioPlayerManager().rotationController = _imageAnimController;
+
+    // 🛑 Chỉ xoay nếu nhạc đang phát
+    if (AudioPlayerManager().isPlaying) {
+      _imageAnimController.repeat();
+    }
 
     _audioPlayerManager = AudioPlayerManager(); //Quản lý các hành động như phát, dừng, chuẩn bị bài hát mới, và xử lý các sự kiện liên quan đến âm thanh.
 
 
-    if (_audioPlayerManager.songUrl.compareTo(_song.source) != 0) {
+    if (_audioPlayerManager.songUrl?.compareTo(_song.source) != 0) {
       _audioPlayerManager.updateSongUrl(_song.source);
       _audioPlayerManager.prepare(isNewSong: true);
     } else {
@@ -77,7 +91,6 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   //giải phóng bộ nhớ
   @override
   void dispose() {
-    _imageAnimController.dispose();
     super.dispose();
   }
 
@@ -254,71 +267,67 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   }
 
   void _setNextSong() {
-    // Nếu chế độ Shuffle (phát ngẫu nhiên) đang bật
+    if (widget.songs.isEmpty) return; // Nếu danh sách rỗng, thoát
+
     if (_isShuffle) {
-      var random = Random(); // Tạo đối tượng Random để chọn bài ngẫu nhiên
+      var random = Random();
       _selectedItemIndex = random.nextInt(widget.songs.length);
-      // Chọn ngẫu nhiên một chỉ số bài hát từ danh sách `songs`
     }
-
-    // Nếu không ở chế độ Shuffle, chuyển sang bài tiếp theo nếu còn bài
     else if (_selectedItemIndex < widget.songs.length - 1) {
-      ++_selectedItemIndex; // Tăng chỉ số bài hát hiện tại lên 1 (chuyển bài)
+      ++_selectedItemIndex;
+    }
+    else if (_loopMode == LoopMode.all) {
+      _selectedItemIndex = 0;
     }
 
-    // Xử lý khi danh sách bài hát đã phát hết và chế độ Loop All đang bật
-    else if (_loopMode == LoopMode.all &&
-        _selectedItemIndex == widget.songs.length - 1) {
-      _selectedItemIndex = 0; // Quay lại bài đầu tiên trong danh sách
+    // Lấy bài hát mới
+    final nextSong = widget.songs[_selectedItemIndex];
 
-      // Xử lý chỉ số bài hát vượt quá số lượng bài (phòng trường hợp bất ngờ)
-      if (_selectedItemIndex >= widget.songs.length) {
-        _selectedItemIndex = _selectedItemIndex % widget.songs.length;
-        // Lấy phần dư để đảm bảo chỉ số không vượt quá phạm vi danh sách
-      }
+    // Cập nhật trình phát
+    _audioPlayerManager.updateSongUrl(nextSong.source);
 
-      // Lấy bài hát kế tiếp dựa trên chỉ số đã cập nhật
-      final nextSong = widget.songs[_selectedItemIndex];
-
-      // Cập nhật URL bài hát cho trình phát
-      _audioPlayerManager.updateSongUrl(nextSong.source);
-
-      // Cập nhật trạng thái bài hát hiện tại và thông báo giao diện
-      setState(() {
-        _song = nextSong; // Lưu bài hát hiện tại vào biến `_song`
-      });
-    }
+    // Cập nhật UI
+    setState(() {
+      _song = nextSong;
+    });
   }
 
   void _setPrevSong() {
+    if (widget.songs.isEmpty) return; // Nếu danh sách rỗng, thoát
+
     if (_isShuffle) {
       var random = Random();
       _selectedItemIndex = random.nextInt(widget.songs.length);
     }
     else if (_selectedItemIndex > 0) {
       --_selectedItemIndex;
-    } else if (_loopMode == LoopMode.all && _selectedItemIndex == 0) {
+    }
+    else if (_loopMode == LoopMode.all) {
       _selectedItemIndex = widget.songs.length - 1;
     }
-    if (_selectedItemIndex < 0) {
-      _selectedItemIndex = (-1 * _selectedItemIndex) % widget.songs.length;
-    }
-    final nextSong = widget.songs[_selectedItemIndex];
-    _audioPlayerManager.updateSongUrl(nextSong.source);
+
+    // Lấy bài hát mới
+    final prevSong = widget.songs[_selectedItemIndex];
+
+    // Cập nhật trình phát
+    _audioPlayerManager.updateSongUrl(prevSong.source);
+
+    // Cập nhật UI
     setState(() {
-      _song = nextSong;
+      _song = prevSong;
     });
   }
 
   void _setupRepeatOption() {
-    if (_loopMode == LoopMode.off) {
-      _loopMode = LoopMode.one;
-    } else if (_loopMode == LoopMode.one) {
-      _loopMode = LoopMode.all;
-    } else {
-      _loopMode = LoopMode.off;
-    }
     setState(() {
+      if (_loopMode == LoopMode.off) {
+        _loopMode = LoopMode.one;
+      } else if (_loopMode == LoopMode.one) {
+        _loopMode = LoopMode.all;
+      } else {
+        _loopMode = LoopMode.off;
+      }
+
       _audioPlayerManager.player.setLoopMode(_loopMode);
     });
   }
@@ -338,61 +347,33 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   //phần seekbar
   StreamBuilder<DurationState> _progressBar() {
     return StreamBuilder<DurationState>(
-      // Lắng nghe stream từ _audioPlayerManager.durationState
-      // Đây là nơi cung cấp thông tin về thời lượng (progress, buffered, total) của media.
-        stream: _audioPlayerManager.durationState,
-        builder: (context, snapshot) {
-          // Lấy dữ liệu từ snapshot của stream
-          final durationState = snapshot.data;
+      stream: _audioPlayerManager.durationState,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator()); // Hiển thị loading khi chưa có dữ liệu
+        }
 
-          // Tiến trình hiện tại của bài hát (đã phát được bao nhiêu thời gian)
-          final progress = durationState?.progress ?? Duration.zero;
+        final durationState = snapshot.data!;
+        // final progress = durationState.progress ?? Duration.zero;
+        // final buffered = durationState.buffered ?? Duration.zero;
+        // final total = durationState.total ?? Duration.zero;
 
-          // Tiến trình đã được buffer (tải trước) để phát mà không bị giật
-          final buffered = durationState?.buffered ?? Duration.zero;
-
-          // Tổng thời lượng của bài hát
-          final total = durationState?.total ?? Duration.zero;
-
-          // Trả về widget ProgressBar hiển thị tiến trình của media
-          return ProgressBar(
-            // Tiến trình hiện tại (dựa trên progress)
-            progress: progress,
-
-            // Tổng thời lượng của media
-            total: total,
-
-            // Phần đã buffer (nếu có)
-            buffered: buffered,
-
-            // Hàm xử lý khi người dùng kéo để seek tới thời gian khác
-            onSeek: _audioPlayerManager.player.seek,
-
-            // Chiều cao của thanh tiến trình
-            barHeight: 5.0,
-
-            // Hình dạng của đầu thanh tiến trình (bo tròn)
-            barCapShape: BarCapShape.round,
-
-            // Màu nền của thanh tiến trình
-            baseBarColor: Colors.grey.withOpacity(0.3),
-
-            // Màu thanh tiến trình hiển thị phần đã phát
-            progressBarColor: Colors.green,
-
-            // Màu thanh tiến trình hiển thị phần đã buffer
-            bufferedBarColor: Colors.grey.withOpacity(0.3),
-
-            // Màu của nút điều khiển (thumb)
-            thumbColor: Colors.deepPurple,
-
-            // Màu sáng khi nút điều khiển được chọn (glow effect)
-            thumbGlowColor: Colors.green.withOpacity(0.3),
-
-            // Bán kính của nút điều khiển
-            thumbRadius: 10.0,
-          );
-        });
+        return ProgressBar(
+          progress:durationState.progress,
+          total: durationState.total ?? Duration.zero,
+          buffered: durationState.buffered,
+          onSeek: _audioPlayerManager.player.seek,
+          barHeight: 5.0,
+          barCapShape: BarCapShape.round,
+          baseBarColor: Colors.grey.withOpacity(0.3),
+          progressBarColor: Colors.green,
+          bufferedBarColor: Colors.grey.withOpacity(0.3),
+          thumbColor: Colors.deepPurple,
+          thumbGlowColor: Colors.green.withOpacity(0.3),
+          thumbRadius: 10.0,
+        );
+      },
+    );
   }
 
   StreamBuilder<PlayerState> _playButton() {
