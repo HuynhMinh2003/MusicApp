@@ -99,7 +99,6 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const delta = 64;
-    final radius = (screenWidth - delta) / 2;
     return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: const Text(
