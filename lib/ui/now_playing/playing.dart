@@ -59,6 +59,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     //   duration: const Duration(milliseconds: 12000),
     // );
     // Lấy AnimationController từ AudioPlayerManager
+    // Lắng nghe trạng thái của AudioPlayer
     _imageAnimController = AudioPlayerManager().rotationController ??
         AnimationController(
           vsync: this,
@@ -112,6 +113,9 @@ class _NowPlayingPageState extends State<NowPlayingPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const SizedBox(
+                height: 16,
+              ),
                 Text(_song.album),
                 const SizedBox(
                   height: 16,
@@ -121,26 +125,60 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                   height: 48,
                 ),
 
-                // ảnh nhạc xoay
-                RotationTransition(
-                  turns:
-                  Tween(begin: 0.0, end: 1.0).animate(_imageAnimController),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(radius),
-                    child: FadeInImage.assetNetwork(
-                      placeholder: 'assets/itunes_256.png', //Ảnh chờ
-                      image: _song.image,
-                      width: screenWidth - delta,
-                      height: screenWidth - delta,
-                      imageErrorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/itunes_256.png',//Ảnh thay thế nếu lô
+                // Ảnh nhạc xoay có viền đĩa và lỗ trung tâm
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Viền đĩa nhạc
+                    Container(
+                      width: screenWidth - delta + 20, // Kích thước lớn hơn ảnh một chút
+                      height: screenWidth - delta + 20,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black, // Màu nền giống đĩa nhạc
+                        border: Border.all(color: Colors.grey.shade800, width: 4), // Viền ngoài
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black45,
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Ảnh nhạc xoay bên trong
+                    RotationTransition(
+                      turns: Tween(begin: 0.0, end: 1.0).animate(_imageAnimController),
+                      child: ClipOval( // Cắt ảnh thành hình tròn
+                        child: FadeInImage.assetNetwork(
+                          placeholder: 'assets/itunes_256.png', // Ảnh chờ
+                          image: _song.image,
                           width: screenWidth - delta,
                           height: screenWidth - delta,
-                        );
-                      },
+                          fit: BoxFit.cover, // Đảm bảo ảnh đầy đủ trong vùng
+                          imageErrorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/itunes_256.png', // Ảnh thay thế nếu lỗi
+                              width: screenWidth - delta,
+                              height: screenWidth - delta,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
+                    // Lỗ nhỏ ở giữa đĩa nhạc
+                    Container(
+                      width: 20, // Kích thước lỗ nhỏ
+                      height: 20,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black, // Màu đen để tạo cảm giác lỗ trên đĩa
+                        border: Border.all(color: Colors.grey.shade600, width: 2), // Viền nhẹ để nổi bật
+                      ),
+                    ),
+                  ],
                 ),
 
                 // nút share + tên + nút tim
@@ -282,6 +320,8 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
     // Lấy bài hát mới
     final nextSong = widget.songs[_selectedItemIndex];
+
+    print("🎵 Chuyển sang bài hát mới: ${nextSong.title}"); // Debug log
 
     // Cập nhật trình phát
     _audioPlayerManager.updateSongUrl(nextSong.source);
@@ -438,25 +478,27 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
           // Xử lý khi bài hát đã hoàn tất phát
           else {
-            // Khi trạng thái là completed => Dừng và reset animation
+            // Khi trạng thái là completed => Kiểm tra chế độ lặp
             if (processingState == ProcessingState.completed) {
               _imageAnimController.stop(); // Dừng hoạt ảnh
               _currentAnimationPosition = 0.0; // Reset vị trí hoạt ảnh về 0
             }
+
             return MediaButtonControl(
-              // Hàm được gọi khi nhấn nút Replay
-                function: () {
-                  // Bắt đầu lại hoạt ảnh
+              function: () {
+                  // Nếu không ở LoopMode.all, phát lại bài hiện tại
                   _imageAnimController.forward(from: _currentAnimationPosition);
                   _imageAnimController.repeat();
 
                   // Phát lại bài hát từ đầu
                   _audioPlayerManager.player.seek(Duration.zero);
-                },
-                icon: Icons.replay, // Icon nút Replay
-                color: null,
-                size: 48);
+              },
+              icon: Icons.replay, // Icon thay đổi tùy theo chế độ
+              color: null,
+              size: 48,
+            );
           }
+
         });
   }
 
