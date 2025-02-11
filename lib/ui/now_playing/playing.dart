@@ -39,7 +39,8 @@ class NowPlayingPage extends StatefulWidget {
 
 class _NowPlayingPageState extends State<NowPlayingPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _imageAnimController; // Quản lý hoạt ảnh xoay ảnh album
+  late AnimationController
+      _imageAnimController; // Quản lý hoạt ảnh xoay ảnh album
   late AudioPlayerManager _audioPlayerManager; // Quản lý phát nhạc
   late int _selectedItemIndex; // Chỉ số bài hát đang được chọn
   late Song _song; // Bài hát hiện tại
@@ -53,7 +54,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   void initState() {
     super.initState();
     _currentAnimationPosition = 0.0;
-    _song = widget.playingSong;//Lấy bài hát hiện tại
+    _song = widget.playingSong; //Lấy bài hát hiện tại
     // _imageAnimController = AnimationController(
     //   vsync: this,
     //   duration: const Duration(milliseconds: 12000),
@@ -74,8 +75,8 @@ class _NowPlayingPageState extends State<NowPlayingPage>
       _imageAnimController.repeat();
     }
 
-    _audioPlayerManager = AudioPlayerManager(); //Quản lý các hành động như phát, dừng, chuẩn bị bài hát mới, và xử lý các sự kiện liên quan đến âm thanh.
-
+    _audioPlayerManager =
+        AudioPlayerManager(); //Quản lý các hành động như phát, dừng, chuẩn bị bài hát mới, và xử lý các sự kiện liên quan đến âm thanh.
 
     if (_audioPlayerManager.songUrl?.compareTo(_song.source) != 0) {
       _audioPlayerManager.updateSongUrl(_song.source);
@@ -86,7 +87,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
     _selectedItemIndex = widget.songs.indexOf(widget.playingSong);
     // Xác định chỉ số bài hát
-    _loopMode = LoopMode.off;// Mặc định là không lặp
+    _loopMode = LoopMode.off; // Mặc định là không lặp
   }
 
   //giải phóng bộ nhớ
@@ -105,7 +106,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
             'Now Playing',
           ),
           trailing:
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
         ),
         child: Scaffold(
           body: Center(
@@ -113,8 +114,8 @@ class _NowPlayingPageState extends State<NowPlayingPage>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(
-                height: 16,
-              ),
+                  height: 16,
+                ),
                 Text(_song.album),
                 const SizedBox(
                   height: 16,
@@ -130,13 +131,17 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                   children: [
                     // Viền đĩa nhạc
                     Container(
-                      width: screenWidth - delta + 20, // Kích thước lớn hơn ảnh một chút
+                      width: screenWidth - delta + 20,
+                      // Kích thước lớn hơn ảnh một chút
                       height: screenWidth - delta + 20,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.black, // Màu nền giống đĩa nhạc
-                        border: Border.all(color: Colors.grey.shade800, width: 4), // Viền ngoài
-                        boxShadow: [
+                        color: Colors.black,
+                        // Màu nền giống đĩa nhạc
+                        border:
+                            Border.all(color: Colors.grey.shade800, width: 4),
+                        // Viền ngoài
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black45,
                             blurRadius: 8,
@@ -148,14 +153,18 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
                     // Ảnh nhạc xoay bên trong
                     RotationTransition(
-                      turns: Tween(begin: 0.0, end: 1.0).animate(_imageAnimController),
-                      child: ClipOval( // Cắt ảnh thành hình tròn
+                      turns: Tween(begin: 0.0, end: 1.0)
+                          .animate(_imageAnimController),
+                      child: ClipOval(
+                        // Cắt ảnh thành hình tròn
                         child: FadeInImage.assetNetwork(
-                          placeholder: 'assets/itunes_256.png', // Ảnh chờ
+                          placeholder: 'assets/itunes_256.png',
+                          // Ảnh chờ
                           image: _song.image,
                           width: screenWidth - delta,
                           height: screenWidth - delta,
-                          fit: BoxFit.cover, // Đảm bảo ảnh đầy đủ trong vùng
+                          fit: BoxFit.cover,
+                          // Đảm bảo ảnh đầy đủ trong vùng
                           imageErrorBuilder: (context, error, stackTrace) {
                             return Image.asset(
                               'assets/itunes_256.png', // Ảnh thay thế nếu lỗi
@@ -167,16 +176,19 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                         ),
                       ),
                     ),
-                    // Lỗ nhỏ ở giữa đĩa nhạc
-                    Container(
-                      width: 20, // Kích thước lỗ nhỏ
-                      height: 20,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black, // Màu đen để tạo cảm giác lỗ trên đĩa
-                        border: Border.all(color: Colors.grey.shade600, width: 2), // Viền nhẹ để nổi bật
-                      ),
-                    ),
+                    // // Lỗ nhỏ ở giữa đĩa nhạc
+                    // Container(
+                    //   width: 20, // Kích thước lỗ nhỏ
+                    //   height: 20,
+                    //   decoration: BoxDecoration(
+                    //     shape: BoxShape.circle,
+                    //     color: Colors.black,
+                    //     // Màu đen để tạo cảm giác lỗ trên đĩa
+                    //     border: Border.all(
+                    //         color: Colors.grey.shade600,
+                    //         width: 2), // Viền nhẹ để nổi bật
+                    //   ),
+                    // ),
                   ],
                 ),
 
@@ -203,26 +215,24 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                                   .textTheme
                                   .bodyMedium!
                                   .copyWith(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .color),
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .color),
                             ),
-
                             const SizedBox(
                               height: 8,
                             ),
-
                             Text(
                               _song.artist,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium!
                                   .copyWith(
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .color),
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .color),
                             )
                           ],
                         ),
@@ -309,11 +319,9 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     if (_isShuffle) {
       var random = Random();
       _selectedItemIndex = random.nextInt(widget.songs.length);
-    }
-    else if (_selectedItemIndex < widget.songs.length - 1) {
+    } else if (_selectedItemIndex < widget.songs.length - 1) {
       ++_selectedItemIndex;
-    }
-    else if (_loopMode == LoopMode.all) {
+    } else if (_loopMode == LoopMode.all) {
       _selectedItemIndex = 0;
     }
 
@@ -337,11 +345,9 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     if (_isShuffle) {
       var random = Random();
       _selectedItemIndex = random.nextInt(widget.songs.length);
-    }
-    else if (_selectedItemIndex > 0) {
+    } else if (_selectedItemIndex > 0) {
       --_selectedItemIndex;
-    }
-    else if (_loopMode == LoopMode.all) {
+    } else if (_loopMode == LoopMode.all) {
       _selectedItemIndex = widget.songs.length - 1;
     }
 
@@ -389,7 +395,9 @@ class _NowPlayingPageState extends State<NowPlayingPage>
       stream: _audioPlayerManager.durationState,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator()); // Hiển thị loading khi chưa có dữ liệu
+          return const Center(
+              child:
+                  CircularProgressIndicator()); // Hiển thị loading khi chưa có dữ liệu
         }
 
         final durationState = snapshot.data!;
@@ -398,7 +406,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
         // final total = durationState.total ?? Duration.zero;
 
         return ProgressBar(
-          progress:durationState.progress,
+          progress: durationState.progress,
           total: durationState.total ?? Duration.zero,
           buffered: durationState.buffered,
           onSeek: _audioPlayerManager.player.seek,
@@ -415,92 +423,183 @@ class _NowPlayingPageState extends State<NowPlayingPage>
     );
   }
 
+  // StreamBuilder<PlayerState> _playButton() {
+  //   return StreamBuilder(
+  //     // Stream lắng nghe trạng thái của player
+  //       stream: _audioPlayerManager.player.playerStateStream,
+  //       builder: (context, snapshot)
+  //       {
+  //         // Lấy dữ liệu PlayerState từ snapshot
+  //         final playState = snapshot.data;
+  //
+  //         // Lấy trạng thái xử lý của player (loading, buffering, ready, completed, ...)
+  //         final processingState = playState?.processingState;
+  //
+  //         // Kiểm tra xem player có đang phát nhạc không
+  //         final playing = playState?.playing;
+  //
+  //         // Xử lý khi player đang tải (loading) hoặc buffer (buffering)
+  //         if (processingState == ProcessingState.loading ||
+  //             processingState == ProcessingState.buffering) {
+  //           return Container(
+  //             margin: const EdgeInsets.all(8), // Căn lề xung quanh nút
+  //             width: 48, // Chiều rộng của container
+  //             height: 48, // Chiều cao của container
+  //             child: const CircularProgressIndicator(), // Hiển thị vòng tròn xoay (loading)
+  //           );
+  //         }
+  //
+  //         // Xử lý khi player không phát (paused hoặc chưa phát)
+  //         else if (playing != true) {
+  //           return MediaButtonControl(
+  //             // Hàm được gọi khi nhấn nút Play
+  //               function: () {
+  //                 _audioPlayerManager.player.play(); // Bắt đầu phát nhạc
+  //
+  //                 // Tiến hành hoạt động với animation:
+  //                 // Tiếp tục hoạt ảnh từ vị trí hiện tại và lặp lại
+  //                 _imageAnimController.forward(from: _currentAnimationPosition);
+  //                 _imageAnimController.repeat();
+  //               },
+  //               icon: Icons.play_arrow, // Icon nút Play
+  //               color: null, // Màu của nút (null: sử dụng mặc định)
+  //               size: 48); // Kích thước của nút
+  //         }
+  //
+  //         // Xử lý khi player đang phát nhưng chưa hoàn tất bài hát
+  //         else if (processingState != ProcessingState.completed) {
+  //           return MediaButtonControl(
+  //             // Hàm được gọi khi nhấn nút Pause
+  //               function: () {
+  //                 _audioPlayerManager.player.pause(); // Tạm dừng phát nhạc
+  //
+  //                 // Dừng hoạt ảnh
+  //                 _imageAnimController.stop();
+  //
+  //                 // Lưu vị trí hiện tại của hoạt ảnh
+  //                 _currentAnimationPosition = _imageAnimController.value;
+  //               },
+  //               icon: Icons.pause, // Icon nút Pause
+  //               color: null,
+  //               size: 48);
+  //         }
+  //
+  //         // Xử lý khi bài hát đã hoàn tất phát
+  //         else {
+  //           if (processingState == ProcessingState.completed) {
+  //             _imageAnimController.stop();
+  //             _currentAnimationPosition = 0.0;
+  //
+  //             // Kiểm tra nếu đang ở chế độ lặp toàn bộ thì phát bài tiếp theo
+  //             if (_loopMode == LoopMode.all || _loopMode == LoopMode.off) {
+  //               _setNextSong(); // Hàm chuyển bài
+  //             } else {
+  //               // Nếu lặp 1 bài thì phát lại từ đầu
+  //               _audioPlayerManager.player.seek(Duration.zero);
+  //               _audioPlayerManager.player.play();
+  //               _imageAnimController.forward(from: 0);
+  //               _imageAnimController.repeat();
+  //             }
+  //           }
+  //           return const SizedBox.shrink(); // Ẩn nút Replay khi auto chuyển bài
+  //         }
+  //
+  //         //   // Xử lý khi bài hát đã hoàn tất phát
+  //         //   else {
+  //         // // Khi trạng thái là completed => Kiểm tra chế độ lặp
+  //         // if (processingState == ProcessingState.completed) {
+  //         // _imageAnimController.stop(); // Dừng hoạt ảnh
+  //         // _currentAnimationPosition = 0.0; // Reset vị trí hoạt ảnh về 0
+  //         // }
+  //         //
+  //         // return MediaButtonControl(
+  //         // function: () {
+  //         // // Nếu không ở LoopMode.all, phát lại bài hiện tại
+  //         // _imageAnimController.forward(from: _currentAnimationPosition);
+  //         // _imageAnimController.repeat();
+  //         //
+  //         // // Phát lại bài hát từ đầu
+  //         // _audioPlayerManager.player.seek(Duration.zero);
+  //         // },
+  //         // icon: Icons.replay, // Icon thay đổi tùy theo chế độ
+  //         // color: null,
+  //         // size: 48,
+  //         // );
+  //         // }
+  //       });
+  // }
+
   StreamBuilder<PlayerState> _playButton() {
     return StreamBuilder(
-      // Stream lắng nghe trạng thái của player
-        stream: _audioPlayerManager.player.playerStateStream,
-        builder: (context, snapshot) {
-          // Lấy dữ liệu PlayerState từ snapshot
-          final playState = snapshot.data;
+      stream: _audioPlayerManager.player.playerStateStream,
+      builder: (context, snapshot) {
+        final playState = snapshot.data;
+        final processingState = playState?.processingState;
+        final playing = playState?.playing;
 
-          // Lấy trạng thái xử lý của player (loading, buffering, ready, completed, ...)
-          final processingState = playState?.processingState;
+        if (processingState == ProcessingState.loading ||
+            processingState == ProcessingState.buffering) {
+          return Container(
+            margin: const EdgeInsets.all(8),
+            width: 48,
+            height: 48,
+            child: const CircularProgressIndicator(),
+          );
+        }
 
-          // Kiểm tra xem player có đang phát nhạc không
-          final playing = playState?.playing;
+        // Nếu player chưa phát
+        if (playing != true) {
+          return MediaButtonControl(
+            function: () {
+              _audioPlayerManager.player.play();
+              _imageAnimController.forward(from: _currentAnimationPosition);
+              _imageAnimController.repeat();
+            },
+            icon: Icons.play_arrow,
+            color: null,
+            size: 48,
+          );
+        }
 
-          // Xử lý khi player đang tải (loading) hoặc buffer (buffering)
-          if (processingState == ProcessingState.loading ||
-              processingState == ProcessingState.buffering) {
-            return Container(
-              margin: const EdgeInsets.all(8), // Căn lề xung quanh nút
-              width: 48, // Chiều rộng của container
-              height: 48, // Chiều cao của container
-              child: const CircularProgressIndicator(), // Hiển thị vòng tròn xoay (loading)
-            );
+        // Nếu player đang phát
+        if (processingState != ProcessingState.completed) {
+          return MediaButtonControl(
+            function: () {
+              _audioPlayerManager.player.pause();
+              _imageAnimController.stop();
+              _currentAnimationPosition = _imageAnimController.value;
+            },
+            icon: Icons.pause,
+            color: null,
+            size: 48,
+          );
+        }
+
+        // Khi bài hát kết thúc
+        if (processingState == ProcessingState.completed) {
+          // _imageAnimController.stop();
+          // _currentAnimationPosition = 0.0;
+
+          if (_loopMode == LoopMode.all || _loopMode == LoopMode.off) {
+            // Chuyển sang bài hát tiếp theo
+            Future.microtask(() {
+              setState(() {
+                _setNextSong();
+              });
+            });
+          } else {
+            // Lặp lại bài hát
+            _audioPlayerManager.player.seek(Duration.zero);
+            _audioPlayerManager.player.play();
+            _imageAnimController.forward(from: 0);
+            _imageAnimController.repeat();
           }
+        }
 
-          // Xử lý khi player không phát (paused hoặc chưa phát)
-          else if (playing != true) {
-            return MediaButtonControl(
-              // Hàm được gọi khi nhấn nút Play
-                function: () {
-                  _audioPlayerManager.player.play(); // Bắt đầu phát nhạc
-
-                  // Tiến hành hoạt động với animation:
-                  // Tiếp tục hoạt ảnh từ vị trí hiện tại và lặp lại
-                  _imageAnimController.forward(from: _currentAnimationPosition);
-                  _imageAnimController.repeat();
-                },
-                icon: Icons.play_arrow, // Icon nút Play
-                color: null, // Màu của nút (null: sử dụng mặc định)
-                size: 48); // Kích thước của nút
-          }
-
-          // Xử lý khi player đang phát nhưng chưa hoàn tất bài hát
-          else if (processingState != ProcessingState.completed) {
-            return MediaButtonControl(
-              // Hàm được gọi khi nhấn nút Pause
-                function: () {
-                  _audioPlayerManager.player.pause(); // Tạm dừng phát nhạc
-
-                  // Dừng hoạt ảnh
-                  _imageAnimController.stop();
-
-                  // Lưu vị trí hiện tại của hoạt ảnh
-                  _currentAnimationPosition = _imageAnimController.value;
-                },
-                icon: Icons.pause, // Icon nút Pause
-                color: null,
-                size: 48);
-          }
-
-          // Xử lý khi bài hát đã hoàn tất phát
-          else {
-            // Khi trạng thái là completed => Kiểm tra chế độ lặp
-            if (processingState == ProcessingState.completed) {
-              _imageAnimController.stop(); // Dừng hoạt ảnh
-              _currentAnimationPosition = 0.0; // Reset vị trí hoạt ảnh về 0
-            }
-
-            return MediaButtonControl(
-              function: () {
-                  // Nếu không ở LoopMode.all, phát lại bài hiện tại
-                  _imageAnimController.forward(from: _currentAnimationPosition);
-                  _imageAnimController.repeat();
-
-                  // Phát lại bài hát từ đầu
-                  _audioPlayerManager.player.seek(Duration.zero);
-              },
-              icon: Icons.replay, // Icon thay đổi tùy theo chế độ
-              color: null,
-              size: 48,
-            );
-          }
-
-        });
+        return const SizedBox.shrink(); // Ẩn nút khi auto chuyển bài
+      },
+    );
   }
-
 }
 
 class MediaButtonControl extends StatefulWidget {
