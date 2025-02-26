@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:music_app/ui/discovery/discovery.dart';
 import 'package:music_app/ui/home/viewmodel.dart';
 import 'package:music_app/ui/now_playing/audio_player_manager.dart';
@@ -15,14 +17,21 @@ class MusicApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Music App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MusicHomePage(),
-      debugShowCheckedModeBanner: false, //xóa cái banner debug
+    return ScreenUtilInit(
+      designSize: const Size(384, 856.1777777777778), // Tạm thời để vậy, chạy app rồi in kích thước thực tế
+      minTextAdapt: true,
+      builder: (context, child){
+        // print('Screen width: ${ScreenUtil().screenWidth}, height: ${ScreenUtil().screenHeight}');
+        return MaterialApp(
+          title: 'Music App',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+            useMaterial3: true,
+          ),
+          home: const MusicHomePage(),
+          debugShowCheckedModeBanner: false, //xóa cái banner debug
+        );
+      },
     );
   }
 }
@@ -45,6 +54,10 @@ class _MusicHomePageState extends State<MusicHomePage> {
     const AccountTab(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -172,11 +185,11 @@ class _HomeTabPageState extends State<HomeTabPage> {
       },
       // Chèn đường phân cách giữa các dòng
       separatorBuilder: (context, index) {
-        return const Divider(
+        return Divider(
           color: Colors.grey,
-          thickness: 1,
-          indent: 24,
-          endIndent: 24,
+          thickness: 1.h,
+          indent: 24.w,
+          endIndent: 24.w,
         );
       },
       // Số lượng bài hát trong danh sách
@@ -203,7 +216,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           child: Container(
-            height: 400, // Chiều cao của bottom sheet
+            height: 400.h, // Chiều cao của bottom sheet
             color: Colors.green, // Màu nền của bottom sheet
             child: Center(
               child: Column(
@@ -251,19 +264,19 @@ class _SongItemSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.only(
-        left: 24, // Khoảng cách bên trái của item
-        right: 8, // Khoảng cách bên phải của item
+      contentPadding:  EdgeInsets.only(
+        left: 24.w, // Khoảng cách bên trái của item
+        right: 8.w, // Khoảng cách bên phải của item
       ),
 
       leading:  ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: CachedNetworkImage(
           imageUrl: song.image,
-          placeholder: (context, url) => Image.asset('assets/itunes_256.png', width: 48, height: 48),
-          errorWidget: (context, url, error) => Image.asset('assets/itunes_256.png', width: 48, height: 48),
-          width: 48,
-          height: 48,
+          placeholder: (context, url) => Image.asset('assets/itunes_256.png', width: 48.w, height: 48.h),
+          errorWidget: (context, url, error) => Image.asset('assets/itunes_256.png', width: 48.w, height: 48.h),
+          width: 48.w,
+          height: 48.h,
         ),
       ),
       title: Text(song.title), // Hiển thị tiêu đề bài hát

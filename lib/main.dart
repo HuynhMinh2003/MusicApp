@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:music_app/data/repository/repository.dart';
 import 'package:music_app/ui/home/home.dart';
 
@@ -22,4 +23,13 @@ import 'package:music_app/ui/home/home.dart';
 //   }
 // }
 
-void main() => runApp(const MusicApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Làm trong suốt
+      statusBarIconBrightness: Brightness.light, // Icon màu trắng
+    ),
+  );
+  runApp(const MusicApp());
+}

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../data/model/song.dart';
@@ -99,7 +101,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    const delta = 64;
+    double delta = 64.w;
     return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: const Text(
@@ -113,16 +115,16 @@ class _NowPlayingPageState extends State<NowPlayingPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
-                  height: 16,
+                SizedBox(
+                  height: 16.h,
                 ),
                 Text(_song.album),
-                const SizedBox(
-                  height: 16,
+                SizedBox(
+                  height: 16.h,
                 ),
                 const Text('_ ___ _ '),
-                const SizedBox(
-                  height: 48,
+                SizedBox(
+                  height: 48.h,
                 ),
 
                 // Ảnh nhạc xoay có viền đĩa và lỗ trung tâm
@@ -139,13 +141,13 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                         color: Colors.black,
                         // Màu nền giống đĩa nhạc
                         border:
-                            Border.all(color: Colors.grey.shade800, width: 4),
+                            Border.all(color: Colors.grey.shade800, width: 4.w),
                         // Viền ngoài
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
                             color: Colors.black45,
-                            blurRadius: 8,
-                            spreadRadius: 2,
+                            blurRadius: 8.r,
+                            spreadRadius: 2.r,
                           ),
                         ],
                       ),
@@ -194,7 +196,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
                 // nút share + tên + nút tim
                 Padding(
-                  padding: const EdgeInsets.only(top: 64, bottom: 16),
+                  padding: EdgeInsets.only(top: 64.h, bottom: 16.h),
                   child: SizedBox(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -220,8 +222,8 @@ class _NowPlayingPageState extends State<NowPlayingPage>
                                           .bodyMedium!
                                           .color),
                             ),
-                            const SizedBox(
-                              height: 8,
+                            SizedBox(
+                              height: 8.h,
                             ),
                             Text(
                               _song.artist,
@@ -250,19 +252,19 @@ class _NowPlayingPageState extends State<NowPlayingPage>
 
                 Padding(
                   // thanh load tiến trình phát
-                  padding: const EdgeInsets.only(
-                    top: 32,
-                    left: 24,
-                    right: 24,
-                    bottom: 16,
+                  padding: EdgeInsets.only(
+                    top: 32.h,
+                    left: 24.w,
+                    right: 24.w,
+                    bottom: 16.h,
                   ),
                   child: _progressBar(),
                 ),
                 Padding(
                   // các nút tương tác nhạc
-                  padding: const EdgeInsets.only(
-                    left: 24,
-                    right: 24,
+                  padding: EdgeInsets.only(
+                    left: 24.w,
+                    right: 24.w,
                   ),
                   child: _mediaButtons(),
                 )
@@ -281,23 +283,23 @@ class _NowPlayingPageState extends State<NowPlayingPage>
               function: _setShuffle,
               icon: Icons.shuffle,
               color: _getShuffleColor(),
-              size: 24),
+              size: 24.r),
           MediaButtonControl(
               function: _setPrevSong,
               icon: Icons.skip_previous,
               color: Colors.deepPurple,
-              size: 36),
+              size: 36.r),
           _playButton(),
           MediaButtonControl(
               function: _setNextSong,
               icon: Icons.skip_next,
               color: Colors.deepPurple,
-              size: 36),
+              size: 36.r),
           MediaButtonControl(
               function: _setupRepeatOption,
               icon: _repeatingIcon(),
               color: _getRepeatingIconColor(),
-              size: 24),
+              size: 24.r),
         ],
       ),
     );
@@ -410,14 +412,15 @@ class _NowPlayingPageState extends State<NowPlayingPage>
           total: durationState.total ?? Duration.zero,
           buffered: durationState.buffered,
           onSeek: _audioPlayerManager.player.seek,
-          barHeight: 5.0,
+          barHeight: 5.0.h, // Điều chỉnh theo chiều cao màn hình
           barCapShape: BarCapShape.round,
           baseBarColor: Colors.grey.withOpacity(0.3),
           progressBarColor: Colors.green,
           bufferedBarColor: Colors.grey.withOpacity(0.3),
           thumbColor: Colors.deepPurple,
           thumbGlowColor: Colors.green.withOpacity(0.3),
-          thumbRadius: 10.0,
+          thumbRadius: 10.0.r, // Điều chỉnh theo tỷ lệ màn hình
+
         );
       },
     );
@@ -540,11 +543,12 @@ class _NowPlayingPageState extends State<NowPlayingPage>
         if (processingState == ProcessingState.loading ||
             processingState == ProcessingState.buffering) {
           return Container(
-            margin: const EdgeInsets.all(8),
-            width: 48,
-            height: 48,
-            child: const CircularProgressIndicator(),
+            margin: EdgeInsets.all(8.w), // Tự động co giãn theo chiều rộng màn hình
+            width: 48.w, // Điều chỉnh theo chiều rộng màn hình
+            height: 48.w, // Điều chỉnh theo chiều rộng màn hình (hoặc dùng .h nếu muốn theo chiều cao)
+            child: CircularProgressIndicator(),
           );
+
         }
 
         // Nếu player chưa phát
@@ -557,7 +561,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
             },
             icon: Icons.play_arrow,
             color: null,
-            size: 48,
+            size: 48.r,
           );
         }
 
@@ -571,7 +575,7 @@ class _NowPlayingPageState extends State<NowPlayingPage>
             },
             icon: Icons.pause,
             color: null,
-            size: 48,
+            size: 48.r,
           );
         }
 
